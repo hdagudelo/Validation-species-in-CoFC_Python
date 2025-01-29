@@ -36,7 +36,7 @@ Usage
 Place your input Excel file in the same directory as the script. The default input file name is Database_checklist_Cesar.xlsx.
 Modify the input_file and output_file variables in the script if needed.
 Run the script:
-python script_validacion.py
+python CoFC_Python_validation.py
 The results will be saved in validation_CoFC_python.xlsx, and errors will be logged in logs_validation.txt.
 Input File Format
 
@@ -64,7 +64,8 @@ Errors encountered during API requests will be logged in logs_validation.txt wit
 
 License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the GNU General Public License v3.0.
+See the LICENSE file for more details.
 
 Author
 
