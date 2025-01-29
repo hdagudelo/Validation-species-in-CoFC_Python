@@ -26,8 +26,8 @@ This script requires the following Python libraries:
 ## Installation
 1. Clone this repository:
    ```bash
-   git clone https://github.com/your-username/your-repository.git
-   cd your-repository
+   git clone https://github.com/hdagudelo/Validation-species-in-CoFC_Python.git
+   cd Validation-species-in-CoFC_Python
 
 2.   Install dependencies:
 pip install -r requirements.txt
