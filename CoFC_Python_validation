@@ -1,0 +1,102 @@
+# Author: Henry D. Agudelo-Zamora
+# Email: hdagudelo@gmail.com
+# Purpose: Validation of scientific names using the Catalog of Fishes of Colombia API
+# Libraries used: requests, pandas, openpyxl, urllib, json, time
+
+# Import necessary libraries
+import pandas as pd
+import requests
+import urllib.parse
+import json
+import time
+from openpyxl import Workbook
+
+# Input and output file paths
+# Modify these paths according to your file structure
+input_file = "Archive-for-validation.xlsx"
+output_file = "validation_CoFC_python.xlsx"
+log_file = "logs_validation.txt"
+
+# Sheet name to read from the Excel file
+sheet_name = "CoFC_validation"
+
+# Read the Excel file and specific sheet
+species_data = pd.read_excel(input_file, sheet_name=sheet_name)
+
+# Assumes scientific names are in the first column
+scientific_names = species_data.iloc[:, 0]
+
+# Create or clear the log file
+with open(log_file, "w") as log:
+    log.write("Start of error logging\n")
+
+# Function to log errors
+def log_error(message):
+    with open(log_file, "a") as log:
+        log.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {message}\n")
+
+# Function to validate a species name
+def validate_species(name):
+    encoded_name = urllib.parse.quote(name)
+    url = f"http://catalogopecesdecolombia.unal.edu.co/results/api/v1/species/{encoded_name}"
+    
+    for attempt in range(3):  # Try up to 3 times
+        try:
+            response = requests.get(url, timeout=20)  # Extend timeout to 20 seconds
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check if the response contains valid species data
+                if "species" in data and data["species"]:
+                    # Extract basin information
+                    basin = "Not specified"  # Default value
+                    if "basins" in data and data["basins"]:
+                        if isinstance(data["basins"][0], dict) and "basin" in data["basins"][0]:
+                            basin = data["basins"][0]["basin"]
+                        elif isinstance(data["basins"], list):
+                            basin = data["basins"][0]
+                    
+                    return {
+                        "Status": "Valid",
+                        "LSID": data.get("lsid"),
+                        "IUCN_Category": data.get("uicn"),
+                        "Basin": basin
+                    }
+                else:
+                    return {
+                        "Status": "Not found",
+                        "LSID": None,
+                        "IUCN_Category": None,
+                        "Basin": None
+                    }
+        except requests.RequestException as e:
+            log_error(f"Error validating: {name} - Attempt: {attempt + 1} - {e}")
+            time.sleep(2)  # Wait 2 seconds before retrying
+    
+    # If all attempts fail, log and return an error message
+    log_error(f"Permanent error for: {name} - {url}")
+    return {
+        "Status": "Species not present in Colombia or not included in the catalog",
+        "LSID": None,
+        "IUCN_Category": None,
+        "Basin": None
+    }
+
+# Validate each name in the list
+results = [validate_species(name) for name in scientific_names]
+
+# Create a new DataFrame with the results
+final_result = pd.DataFrame({
+    "Scientific_Name": scientific_names,
+    "Status": [result["Status"] for result in results],
+    "LSID": [result["LSID"] for result in results],
+    "IUCN_Category": [result["IUCN_Category"] for result in results],
+    "Basin": [result["Basin"] for result in results]
+})
+
+# Save the results to a new Excel file
+final_result.to_excel(output_file, index=False, engine="openpyxl")
+
+# Print completion messages
+print(f"Validation completed. Results are saved in: {output_file}")
+print(f"Errors were logged in: {log_file}")
