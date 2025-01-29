@@ -28,3 +28,46 @@ This script requires the following Python libraries:
    ```bash
    git clone https://github.com/your-username/your-repository.git
    cd your-repository
+
+2.   Install dependencies:
+pip install -r requirements.txt
+Usage
+
+Place your input Excel file in the same directory as the script. The default input file name is Database_checklist_Cesar.xlsx.
+Modify the input_file and output_file variables in the script if needed.
+Run the script:
+python script_validacion.py
+The results will be saved in validation_CoFC_python.xlsx, and errors will be logged in logs_validation.txt.
+Input File Format
+
+The input Excel file should have the following structure:
+
+A single sheet (default: CoFC_validation).
+The first column must contain the scientific names to validate.
+Example:
+
+Scientific_Name
+Astyanax fasciatus
+Corydoras aeneus
+Output File Format
+
+The output Excel file will contain the following columns:
+
+Scientific_Name: The name from the input file.
+Status: Validation status (e.g., "Valid", "Not found").
+LSID: The unique identifier for the species (if available).
+IUCN_Category: Conservation status (if available).
+Basin: The basin where the species is distributed (if available).
+Error Logging
+
+Errors encountered during API requests will be logged in logs_validation.txt with timestamps for debugging purposes.
+
+License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+Author
+
+Henry D. Agudelo-Zamora
+Email: hdagudelo@gmail.com
+Purpose: Validation of scientific names using the Catalog of Fishes of Colombia API.
